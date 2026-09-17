@@ -17,7 +17,26 @@ def parse_args():
         default='./output.pptx',
     )
 
-    subparsers = parser.add_subparsers(dest='pattern')
+    subparsers = parser.add_subparsers(dest='pattern', required=True)
+
+    ntext = argparse.ArgumentParser(add_help=False)
+    ntext.add_argument(
+        '--title',
+        type=str,
+        required=True,
+    )
+    ntext.add_argument(
+        '--subtitles',
+        nargs='+',
+        type=str,
+        required=True,
+    )
+    ntext.add_argument(
+        '--texts',
+        nargs='+',
+        type=str,
+        required=True,
+    )
 
     parser_title = subparsers.add_parser('title')
     parser_title.add_argument(
@@ -53,131 +72,8 @@ def parse_args():
         required=True,
     )
 
-    parser_1text = subparsers.add_parser('1text')
-    parser_1text.add_argument(
-        '--title',
-        type=str,
-        required=True,
-    )
-    parser_1text.add_argument(
-        '--title1',
-        type=str,
-        required=True,
-    )
-    parser_1text.add_argument(
-        '--text1',
-        type=str,
-        required=True,
-    )
-
-    parser_2text = subparsers.add_parser('2text')
-    parser_2text.add_argument(
-        '--title',
-        type=str,
-        required=True,
-    )
-    parser_2text.add_argument(
-        '--title1',
-        type=str,
-        required=True,
-    )
-    parser_2text.add_argument(
-        '--text1',
-        type=str,
-        required=True,
-    )
-    parser_2text.add_argument(
-        '--title2',
-        type=str,
-        required=True,
-    )
-    parser_2text.add_argument(
-        '--text2',
-        type=str,
-        required=True,
-    )
-
-    parser_3text = subparsers.add_parser('3text')
-    parser_3text.add_argument(
-        '--title',
-        type=str,
-        required=True,
-    )
-    parser_3text.add_argument(
-        '--title1',
-        type=str,
-        required=True,
-    )
-    parser_3text.add_argument(
-        '--text1',
-        type=str,
-        required=True,
-    )
-    parser_3text.add_argument(
-        '--title2',
-        type=str,
-        required=True,
-    )
-    parser_3text.add_argument(
-        '--text2',
-        type=str,
-        required=True,
-    )
-    parser_3text.add_argument(
-        '--title3',
-        type=str,
-        required=True,
-    )
-    parser_3text.add_argument(
-        '--text3',
-        type=str,
-        required=True,
-    )
-
-    parser_4text = subparsers.add_parser('4text')
-    parser_4text.add_argument(
-        '--title',
-        type=str,
-        required=True,
-    )
-    parser_4text.add_argument(
-        '--title1',
-        type=str,
-        required=True,
-    )
-    parser_4text.add_argument(
-        '--text1',
-        type=str,
-        required=True,
-    )
-    parser_4text.add_argument(
-        '--title2',
-        type=str,
-        required=True,
-    )
-    parser_4text.add_argument(
-        '--text2',
-        type=str,
-        required=True,
-    )
-    parser_4text.add_argument(
-        '--title3',
-        type=str,
-        required=True,
-    )
-    parser_4text.add_argument(
-        '--text3',
-        type=str,
-        required=True,
-    )
-    parser_4text.add_argument(
-        '--title4',
-        type=str,
-        required=True,
-    )
-    parser_4text.add_argument(
-        '--text4',
-        type=str,
-        required=True,
-    )
+    parser_1text = subparsers.add_parser('1text', parents=[ntext])
+    parser_2text = subparsers.add_parser('2text', parents=[ntext])
+    parser_3text = subparsers.add_parser('3text', parents=[ntext])
+    parser_4text = subparsers.add_parser('4text', parents=[ntext])
     return parser.parse_args()

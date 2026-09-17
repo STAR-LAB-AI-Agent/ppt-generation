@@ -72,7 +72,7 @@ pip install -r requirements.txt
 主入口为技能目录下的 `scripts/main.py`。通用命令结构：
 
 ```text
-python scripts/main.py -o <输出>.pptx <子命令> <--title> <--titleN> <--textN>...
+python scripts/main.py -o <输出路径>.pptx <子命令> <--title> "标题" <--subtitles> "小标题1" ... <--texts> "正文1" ...
 ```
 
 ### 关键运行约束
@@ -87,22 +87,22 @@ python scripts/main.py -o <输出>.pptx <子命令> <--title> <--titleN> <--text
 ### 5.1 命令行方式
 
 可选参数：
-- -o/--output: 指定输出路径与文件名，默认为 `output.pptx` 。
+- -o/--output: 指定输出路径与文件名，默认为 `./output.pptx` （相对当前工作目录）。
 - -t/--template: 指定模板文件路径，默认为自带模板。
 
 下表给出各段数必须的参数：
 
-| 子命令 | 必填参数 |
-|--------|---------|
-| `1text` | `--title --title1 --text1` |
-| `2text` | `--title --title1 --text1 --title2 --text2` |
-| `3text` | `--title --title1 --text1 --title2 --text2 --title3 --text3` |
-| `4text` | `--title --title1 --text1 --title2 --text2 --title3 --text3 --title4 --text4` |
+| 子命令     | 必填参数                          |
+|---------|-------------------------------|
+| `1text` | `--title --subtitles --texts` |
+| `2text` | `--title --subtitles --texts` |
+| `3text` | `--title --subtitles --texts` |
+| `4text` | `--title --subtitles --texts` |
 
 参数语义：
 - `--title`：页面标题，应简短表明该页讲什么；
-- `--titleN`：第 N 段小标题，几个字即可；
-- `--textN`：第 N 段正文。
+- `--subtitles`：所有小标题，不同段落的小标题必须各自作为一个独立参数传递，按顺序输入，几个字即可；
+- `--texts`：所有正文，不同段落的正文必须各自作为一个独立参数传递，按顺序输入。
 
 ### 5.2 正文长度上限
 
@@ -120,13 +120,13 @@ python scripts/main.py -o <输出>.pptx <子命令> <--title> <--titleN> <--text
 **一段文字**：
 
 ```text
-python scripts/main.py -o page_1text.pptx 1text --title "课程概述" --title1 "概述" --text1 "本课程系统介绍人工智能的核心概念、发展历程与典型应用场景，帮助学习者建立完整认知。"
+python scripts/main.py -o page_1text.pptx 1text --title "课程概述" --subtitles "概述" --texts "本课程系统介绍人工智能的核心概念、发展历程与典型应用场景，帮助学习者建立完整认知。"
 ```
 
 **两段文字**：
 
 ```text
-python scripts/main.py -o page_2text.pptx 2text --title "研究背景与意义" --title1 "研究背景" --text1 "深度学习在图像识别等任务上已取得重大突破。" --title2 "研究意义" --text2 "自动化工具可显著提升文档生产与演示效率。"
+python scripts/main.py -o page_2text.pptx 2text --title "研究背景与意义" --subtitles "研究背景" "研究意义" --texts "深度学习在图像识别等任务上已取得重大突破。" "自动化工具可显著提升文档生产与演示效率。"
 ```
 
 输出文件 `.pptx` 用 PowerPoint / WPS 等打开即可查看。
@@ -135,7 +135,7 @@ python scripts/main.py -o page_2text.pptx 2text --title "研究背景与意义" 
 
 `ppt-generator` 也被注册为 Skill，供智能体侧按同一套子命令生成页面。
 当出现"把 1～4 段文案做成 PPT 页"类任务时，Agent 参照 SKILL.md：选定子命令 → 组织
-`--title`/`--titleN`/`--textN` → 用 5.1–5.2 的限制与约束调用脚本。本 README 面向安装与运维；
+`--title`/`--subtitles`/`--texts` → 用 5.1–5.2 的限制与约束调用脚本。本 README 面向安装与运维；
 写给 Agent 的行为指令见技能附带的 `SKILL.md`。
 
 ---
@@ -165,16 +165,16 @@ python scripts/main.py -o page_2text.pptx 2text --title "研究背景与意义" 
 ### 7.1 环境自检
 ```bash
 python -c "import pptx; print(pptx.__version__)"   # 期望 1.0.2
-python scripts/main.py --help                        # 期望列出 title/1text..4text 子命令
+python scripts/main.py --help                        # 期望列出 1text..4text 子命令
 ```
 
 ### 7.2 脚本功能测试（四种版式各生成一页）
 在技能根目录执行：
 ```bash
-python scripts/main.py -o _t1.pptx 1text --title "T" --title1 "A" --text1 "一"
-python scripts/main.py -o _t2.pptx 2text --title "T" --title1 "A" --text1 "一" --title2 "B" --text2 "二"
-python scripts/main.py -o _t3.pptx 3text --title "T" --title1 "A" --text1 "一" --title2 "B" --text2 "二" --title3 "C" --text3 "三"
-python scripts/main.py -o _t4.pptx 4text --title "T" --title1 "A" --text1 "一" --title2 "B" --text2 "二" --title3 "C" --text3 "三" --title4 "D" --text4 "四"
+python scripts/main.py -o _t1.pptx 1text --title "T" --subtitles "A" --texts "一"
+python scripts/main.py -o _t2.pptx 2text --title "T" --subtitles "A" "B" --texts "一" "二"
+python scripts/main.py -o _t3.pptx 3text --title "T" --subtitles "A" "B" "C" --texts "一" "二" "三"
+python scripts/main.py -o _t4.pptx 4text --title "T" --subtitles "A" "B" "C" "D" --texts "一" "二" "三" "四"
 ```
 
 ### 7.3 Skill 功能测试
