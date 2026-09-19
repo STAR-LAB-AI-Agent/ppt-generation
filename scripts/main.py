@@ -9,7 +9,7 @@ from log_creater import create_log
 def main():
     cmd = " ".join(sys.argv)
     args = parse_args()
-    prs = load_template(args.template)
+    prs = load_template()
     new_prs = choose_slide(prs, args.pattern)
     final_prs = replace_text(new_prs, args)
 

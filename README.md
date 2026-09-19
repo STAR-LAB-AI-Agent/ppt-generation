@@ -1,6 +1,6 @@
 # ppt-generator — 文案自动生成 PPT 技能
 
-一个用 Python 实现的「文案 → PPT」自动化工具/Skill：把 **1～4 段**「小标题 + 正文」填入
+一个用 Python 实现的「文案 → PPT」自动化工具/Skill：把各种类型的文案填入
 北京理工大学答辩/汇报模板（`BIT-template.pptx`），一次生成**一页**指定版式的 `.pptx`。
 本项目同时是一个集成真实 Python 开源项目 [`python-pptx`](https://python-pptx.readthedocs.io/)
 的课程作业示例。
@@ -15,17 +15,18 @@
 ## 1. 项目简介
 
 `ppt-generator` 提供一条命令把文案变成排好版的 PPT 页面。它读取一个现成的 PPT 模板，
-按所选的版式**只保留对应的一页**，把模板占位符（`页面标题`、`正文标题N`、`正文N`）换成
-你传入的文案，最后另存为新的 `.pptx`。
+按所选的版式**只保留对应的一页**，把模板占位符换成你传入的文案，最后另存为新的 `.pptx`。
 
 支持的页面版式与文案形态：
 
-| 文案段数 | 子命令 | 占位/页面特征 |
-|---------|--------|-------------|
-| 一段 | `1text` | 1 个小标题 + 1 段正文 |
-| 两段 | `2text` | 2 个小标题 + 2 段正文 |
-| 三段 | `3text` | 3 个小标题 + 3 段正文 |
-| 四段 | `4text` | 4 个小标题 + 4 段正文 |
+| 文案形态 | 子命令     | 占位/页面特征        |
+|------|---------|----------------|
+| 标题页  | `title` | 大标题 + 个人信息     |
+| 结尾页  | `end`   | 大标题 + 个人信息     |
+| 一段文本 | `1text` | 1 个小标题 + 1 段正文 |
+| 两段文本 | `2text` | 2 个小标题 + 2 段正文 |
+| 三段文本 | `3text` | 3 个小标题 + 3 段正文 |
+| 四段文本 | `4text` | 4 个小标题 + 4 段正文 |
 
 底层完全基于 [python-pptx](https://python-pptx.readthedocs.io/) 
 完成模板加载、页面筛选与文本替换。
@@ -34,8 +35,9 @@
 
 ## 2. 用户场景
 
-适合把一段到四段文字快速做成整齐一页 PPT 的场景，例如：
+适合把各种文案快速做成整齐一页 PPT 的场景，例如：
 
+- **标题 / 结尾页**：展示答辩标题与个人信息；
 - **答辩 / 汇报页**：把「研究背景 / 研究意义 / 结论」等要点各成一段，快速出页；
 - **要点 / 总结页**：章节要点归纳为 3～4 段，保持统一版式；
 - **批量排版**：内容来自数据或模板，用脚本统一排版，避免手工逐页调整。
@@ -72,12 +74,12 @@ pip install -r requirements.txt
 主入口为技能目录下的 `scripts/main.py`。通用命令结构：
 
 ```text
-python scripts/main.py -o <输出路径>.pptx <子命令> <--title> "标题" <--subtitles> "小标题1" ... <--texts> "正文1" ...
+python scripts/main.py -o <输出路径>.pptx <子命令> <参数...>
 ```
 
 ### 关键运行约束
 
-1. **`-o / -t` 必须写在子命令之前**。
+1. **`-o` 必须写在子命令之前**。
 2. **建议总用 `-o` 指定输出路径与文件名**，避免覆盖上次结果。
 
 ---
@@ -88,43 +90,49 @@ python scripts/main.py -o <输出路径>.pptx <子命令> <--title> "标题" <--
 
 可选参数：
 - -o/--output: 指定输出路径与文件名，默认为 `./output.pptx` （相对当前工作目录）。
-- -t/--template: 指定模板文件路径，默认为自带模板。
 
-下表给出各段数必须的参数：
+下表给出各版型必须的参数：
 
 | 子命令     | 必填参数                          |
 |---------|-------------------------------|
+| `title` | `--title --name --teacher`    |
+| `end`   | `--title --name --teacher`    |
 | `1text` | `--title --subtitles --texts` |
 | `2text` | `--title --subtitles --texts` |
 | `3text` | `--title --subtitles --texts` |
 | `4text` | `--title --subtitles --texts` |
 
 参数语义：
-- `--title`：页面标题，应简短表明该页讲什么；
-- `--subtitles`：所有小标题，不同段落的小标题必须各自作为一个独立参数传递，按顺序输入，几个字即可；
+- `--title`：若选择标题页或结尾页，则为页面中央的大标题；若选择正文页，则为页面最上方的页面标题，表明整页主题。
+- `--name`：答辩人姓名。
+- `--teacher`：导师姓名。
+- `--subtitles`：所有小标题，不同段落的小标题必须各自作为一个独立参数传递，按顺序输入，不宜过长。
 - `--texts`：所有正文，不同段落的正文必须各自作为一个独立参数传递，按顺序输入。
 
 ### 5.2 正文长度上限
 
-每段正文不得超过下表（实测值,超出易溢出版面）：
+每段正文不得超过下表（实测值，超出易溢出版面）：
 
-| 子命令 | 每段正文上限 |
-|--------|------------|
-| `1text` | 180 字 |
-| `2text` | 90 字 |
-| `3text` | 60 字 |
-| `4text` | 80 字 |
+| 子命令     | 每段正文上限 |
+|---------|--------|
+| `1text` | 200 字  |
+| `2text` | 100 字  |
+| `3text` | 60 字   |
+| `4text` | 80 字   |
 
 ### 5.3 运行示例
 
-**一段文字**：
+**标题页**：
+```bash
+python scripts/main.py -o page.pptx title --title "人工智能系统答辩" --name "张三" --teacher "李四"
+```
 
+**一段文本**：
 ```text
 python scripts/main.py -o page_1text.pptx 1text --title "课程概述" --subtitles "概述" --texts "本课程系统介绍人工智能的核心概念、发展历程与典型应用场景，帮助学习者建立完整认知。"
 ```
 
-**两段文字**：
-
+**两段文本**：
 ```text
 python scripts/main.py -o page_2text.pptx 2text --title "研究背景与意义" --subtitles "研究背景" "研究意义" --texts "深度学习在图像识别等任务上已取得重大突破。" "自动化工具可显著提升文档生产与演示效率。"
 ```
@@ -134,9 +142,8 @@ python scripts/main.py -o page_2text.pptx 2text --title "研究背景与意义" 
 ### 5.4 作为 Skill（给 Agent）使用
 
 `ppt-generator` 也被注册为 Skill，供智能体侧按同一套子命令生成页面。
-当出现"把 1～4 段文案做成 PPT 页"类任务时，Agent 参照 SKILL.md：选定子命令 → 组织
-`--title`/`--subtitles`/`--texts` → 用 5.1–5.2 的限制与约束调用脚本。本 README 面向安装与运维；
-写给 Agent 的行为指令见技能附带的 `SKILL.md`。
+当出现"生成 PPT 页面"类任务时，Agent 参照 SKILL.md：选定子命令 → 组织参数 → 调用脚本。
+本 README 面向用户安装与运维，写给 Agent 的行为指令见技能附带的 `SKILL.md`。
 
 ---
 
@@ -165,16 +172,18 @@ python scripts/main.py -o page_2text.pptx 2text --title "研究背景与意义" 
 ### 7.1 环境自检
 ```bash
 python -c "import pptx; print(pptx.__version__)"   # 期望 1.0.2
-python scripts/main.py --help                        # 期望列出 1text..4text 子命令
+python scripts/main.py --help                        # 期望列出 title...4text 子命令
 ```
 
-### 7.2 脚本功能测试（四种版式各生成一页）
+### 7.2 脚本功能测试（所有版式各生成一页）
 在技能根目录执行：
 ```bash
-python scripts/main.py -o _t1.pptx 1text --title "T" --subtitles "A" --texts "一"
-python scripts/main.py -o _t2.pptx 2text --title "T" --subtitles "A" "B" --texts "一" "二"
-python scripts/main.py -o _t3.pptx 3text --title "T" --subtitles "A" "B" "C" --texts "一" "二" "三"
-python scripts/main.py -o _t4.pptx 4text --title "T" --subtitles "A" "B" "C" "D" --texts "一" "二" "三" "四"
+python scripts/main.py -o _title.pptx title --title "T" --name "一" --teacher "二"
+python scripts/main.py -o _end.pptx end --title "T" --name "一" --teacher "二"
+python scripts/main.py -o _text1.pptx 1text --title "T" --subtitles "A" --texts "一"
+python scripts/main.py -o _text2.pptx 2text --title "T" --subtitles "A" "B" --texts "一" "二"
+python scripts/main.py -o _text3.pptx 3text --title "T" --subtitles "A" "B" "C" --texts "一" "二" "三"
+python scripts/main.py -o _text4.pptx 4text --title "T" --subtitles "A" "B" "C" "D" --texts "一" "二" "三" "四"
 ```
 
 ### 7.3 Skill 功能测试
@@ -185,7 +194,7 @@ python scripts/main.py -o _t4.pptx 4text --title "T" --subtitles "A" "B" "C" "D"
 
 ## 8. 已知问题
 
-- **一次仅一页**：每次调用只输出模板中被选中的那一页（脚本会裁掉其余 7 页）。做整套 PPT
+- **一次仅一页**：由于 python-pptx 库无法做到对于 PPT 页面的完全复制，脚本每次调用只输出模板中被选中的那一页（脚本会裁掉其余页面）。做整套 PPT
   需多次调用再自行合并，或扩展脚本支持多页。
-- **模板占位是名称匹配**：替换依赖模板中 shape 的名称（`页面标题`/`正文标题N`/`正文N`）。
+- **模板占位是名称匹配**：替换依赖模板中 shape 的名称。
   若换用其它模板，需保证占位 shape 命名一致，否则不会被替换。

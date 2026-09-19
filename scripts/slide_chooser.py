@@ -1,12 +1,10 @@
 PATTERN_TO_INDEX = {
     'title': 0,
     'end': 1,
-    'contents': 2,
-    'content': 3,
-    '1text': 4,
-    '2text': 5,
-    '3text': 6,
-    '4text': 7,
+    '1text': 2,
+    '2text': 3,
+    '3text': 4,
+    '4text': 5,
 }
 
 def choose_slide(prs, pattern):
